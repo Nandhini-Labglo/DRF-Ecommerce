@@ -58,21 +58,21 @@ class ProductSerializer(serializers.ModelSerializer):
 class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
-        fields = ['id', 'product', 'user', 'quantity', 'is_active', ]
-        read_only_fields = ['price']
+        fields = ['id', 'product', 'user', 'quantity', 'is_active','price' ]
+        read_only_fields = ['price','user']
 
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['id', 'user', 'status', ]
-
+        fields = ['id', 'user', 'status', 'product','total_order_price']
+        read_only_fields = ['user','total_order_price']
 
 class WishlistSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = Wishlistitems
-        fields = ['id', 'user', 'product']
-
+        fields = ['id', 'product','user']
 
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:

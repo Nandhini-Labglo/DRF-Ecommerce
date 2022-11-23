@@ -10,8 +10,6 @@ from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
-from rest_framework.decorators import api_view
-from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -90,19 +88,24 @@ class CartViewset(viewsets.ModelViewSet):
     serializer_class = CartSerializer
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user,price=serializer.data['product'].price)
+        serializer.save(user=self.request.user,
+                        price=serializer.validated_data['product'].price)
 
 
-class OrderViewset(viewsets.ModelViewSet):
+class Orderlist(ListAPIView):
     queryset = Order.objects.all()
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = OrderSerializer
 
-
+    
 class WishlistViewset(viewsets.ModelViewSet):
     queryset = Wishlistitems.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticated]
     serializer_class = WishlistSerializer
+
+    def perform_create(self, serializer):
+        print(serializer)
+        serializer.save(user=self.request.user)
 
 
 class PaymentViewset(viewsets.ModelViewSet):
@@ -115,18 +118,15 @@ class CreatecheckoutSessionView(APIView):
     def post(self, *args, **kwargs):
         host = self.request.get_host()
         cart = Cart.objects.filter(
-            Q(user=1) & Q(is_active=True))
+            Q(user=2) & Q(is_active=True))
         grand_total = cart.aggregate(grand_total=Sum(
             F('quantity')*F('price') + (F('quantity')*F('price'))))
-        user = 1
         order = Order.objects.create(
-            user_id=1, status=2, total_order_price=0)
+            user_id=2, status=2, total_order_price=grand_total['grand_total'])
         order.product.add(*cart)
         cart.update(is_active=False)
         print(order.id)
-        for item in cart:
-            product_name = item.product.title
-            product_quantity = item.quantity
+
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[
@@ -174,4 +174,3 @@ class StripeWebhookAPIView(APIView):
                 transaction_id=sessionID).update(payment_status=0)
             Order.objects.filter(transaction_id=sessionID).update(status=0)
         return HttpResponse(True, status=200)
-    

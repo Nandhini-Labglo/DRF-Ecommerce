@@ -3,7 +3,7 @@ from .views import (
     CartViewset,
     CreatecheckoutSessionView,
     LoginAPI,
-    OrderViewset,
+    Orderlist,
     PaymentViewset,
     ProductViewset,
     BrandViewset,
@@ -20,7 +20,6 @@ router.register(r'register', RegisterAPI)
 router.register(r'brand', BrandViewset)
 router.register(r'product', ProductViewset)
 router.register(r'cart', CartViewset)
-router.register(r'order', OrderViewset)
 router.register(r'wishlist', WishlistViewset)
 router.register(r'payment', PaymentViewset)
 
@@ -33,6 +32,7 @@ urlpatterns = [
     path("session", CreatecheckoutSessionView.as_view(),),
     path("webhook", StripeWebhookAPIView.as_view(),),
 
+    path("order",Orderlist.as_view()),
     # router
     path('router/', include(router.urls)),
 ]
