@@ -29,6 +29,7 @@ urlpatterns = [
     # login
     path("login/", LoginAPI.as_view(), name="login"),
 
+    # stripe
     path("session", CreatecheckoutSessionView.as_view(),),
     path("webhook", StripeWebhookAPIView.as_view(),),
 
