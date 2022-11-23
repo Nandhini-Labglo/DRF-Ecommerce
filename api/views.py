@@ -169,7 +169,12 @@ class StripeWebhookAPIView(APIView):
             Payment.objects.filter(
                 transaction_id=sessionID).update(payment_status=1)
             Order.objects.filter(id=ID).update(status=1)
-        elif event['type'] == 'charge.failed':
+        elif event['type'] == 'checkout.session.expired':
+            session = event['data']['object']
+            sessionID = session["id"]
+            print(sessionID)
+            ID = session["metadata"]["order_id"]
+            print(ID)
             Payment.objects.filter(
                 transaction_id=sessionID).update(payment_status=0)
             Order.objects.filter(transaction_id=sessionID).update(status=0)
