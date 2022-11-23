@@ -89,6 +89,9 @@ class CartViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = CartSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user,price=serializer.data['product'].price)
+
 
 class OrderViewset(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -112,13 +115,12 @@ class CreatecheckoutSessionView(APIView):
     def post(self, *args, **kwargs):
         host = self.request.get_host()
         cart = Cart.objects.filter(
-            Q(user=self.request.user.id) & Q(is_active=True))
+            Q(user=1) & Q(is_active=True))
         grand_total = cart.aggregate(grand_total=Sum(
-            F('quantity')*F('price')*0.18 + (F('quantity')*F('price'))))
-        user = self.request.user
-        print(user.id)
+            F('quantity')*F('price') + (F('quantity')*F('price'))))
+        user = 1
         order = Order.objects.create(
-            user_id=user.id, status=2, total_order_price=grand_total['grand_total'])
+            user_id=1, status=2, total_order_price=0)
         order.product.add(*cart)
         cart.update(is_active=False)
         print(order.id)
@@ -143,8 +145,8 @@ class CreatecheckoutSessionView(APIView):
                 "order_id": order.id
             },
             mode='payment',
-            success_url="",
-            cancel_url="",
+            success_url="http://127.0.0.1:8000/",
+            cancel_url="http://127.0.0.1:8000/",
         )
         payment = Payment.objects.create(
             order_id=order.id, transaction_id=checkout_session['id'], payment_status=2)
@@ -173,11 +175,3 @@ class StripeWebhookAPIView(APIView):
             Order.objects.filter(transaction_id=sessionID).update(status=0)
         return HttpResponse(True, status=200)
     
-@api_view(['POST'])
-def test_payment(request):
-    test_payment_intent = stripe.PaymentIntent.create(
-        amount=1000, currency='pln', 
-        payment_method_types=['card'],
-        receipt_email='test@example.com'
-        )
-    return Response(status=status.HTTP_200_OK, data=test_payment_intent)

@@ -5,12 +5,11 @@ from .views import (
     LoginAPI,
     OrderViewset,
     PaymentViewset,
-    ProductViewset, 
+    ProductViewset,
     BrandViewset,
     RegisterAPI,
     StripeWebhookAPIView,
     WishlistViewset,
-    test_payment,
 )
 from rest_framework.routers import DefaultRouter
 
@@ -27,13 +26,12 @@ router.register(r'payment', PaymentViewset)
 
 urlpatterns = [
 
-    #login
+    # login
     path("login/", LoginAPI.as_view(), name="login"),
 
-    path("session",CreatecheckoutSessionView.as_view(),),
-    path("webhook",StripeWebhookAPIView.as_view(),),
-    path("pay",test_payment,),
-    
-    #router
+    path("session", CreatecheckoutSessionView.as_view(),),
+    path("webhook", StripeWebhookAPIView.as_view(),),
+
+    # router
     path('router/', include(router.urls)),
 ]

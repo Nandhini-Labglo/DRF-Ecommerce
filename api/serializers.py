@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from .models import (
-    Brand, 
+    Brand,
     Product,
     Cart,
     Order,
@@ -11,6 +11,7 @@ from .models import (
 )
 
 User = get_user_model()
+
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=300, required=True)
@@ -40,40 +41,40 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_user_token(self, obj):
         return Token.objects.get_or_create(user=obj)[0].key
-    
+
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['brand_name','brand_logo',]
+        fields = ['brand_name', 'brand_logo', ]
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id','title','image','price','in_stock','brand']
+        fields = ['id', 'title', 'image', 'price', 'in_stock', 'brand']
+
 
 class CartSerializer(serializers.ModelSerializer):
-     class Meta:
+    class Meta:
         model = Cart
-        fields = ['id','product','user','quantity','is_active','price']
+        fields = ['id', 'product', 'user', 'quantity', 'is_active', ]
+        read_only_fields = ['price']
+
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['id','user','status',]
+        fields = ['id', 'user', 'status', ]
+
 
 class WishlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wishlistitems
-        fields = ['id','user']
+        fields = ['id', 'user', 'product']
+
 
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ['id','order','transaction_id','payment_status',]
-
-
-
-    
-
-
+        fields = ['id', 'order', 'transaction_id', 'payment_status', ]
